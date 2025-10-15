@@ -1,0 +1,60 @@
+<?php
+// module/Weather/view/partial/paginator.phtml
+
+/**
+ * The pagination helper itself is often the context. We access properties
+ * like $pageCount, $pagesInRange, $route, etc., directly from $this.
+ * This is the standard Laminas Paginator partial context.
+ */
+
+// Use default Bootstrap/Laminas classes or hardcode your own
+$class = 'pagination-container'; // Custom CSS class for the wrapper
+$ulClass = 'pagination';         // Custom CSS class for the ul list
+$route = $this->route;           // Route name passed from the controller
+
+?>
+<?php if ($this->pageCount): ?>
+<nav aria-label="Pagination Control" class="<?= $this->escapeHtmlAttr($class); ?>">
+    <ul class="<?= $this->escapeHtmlAttr($ulClass); ?>">
+        <?php if (isset($this->previous)): ?>
+            <li class="page-item">
+                <a class="page-link" href="<?= $this->url($route, [], ['query' => ['page' => $this->previous], 'fragment' => $this->fragment], true) ?>">
+                    &laquo;
+                </a>
+            </li>
+        <?php else: ?>
+            <li class="page-item disabled">
+                <span class="page-link" aria-hidden="true">&laquo;</span>
+            </li>
+        <?php endif; ?>
+
+        <?php foreach ($this->pagesInRange as $page): ?>
+            <?php if ($page !== $this->current): ?>
+                <li class="page-item">
+                    <a class="page-link" href="<?= $this->url($route, [], ['query' => ['page' => $page], 'fragment' => $this->fragment], true) ?>">
+                        <?= $this->escapeHtml($page) ?>
+                    </a>
+                </li>
+            <?php else: ?>
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">
+                        <?= $this->escapeHtml($page) ?>
+                    </span>
+                </li>
+            <?php endif; ?>
+        <?php endforeach; ?>
+
+        <?php if (isset($this->next)): ?>
+            <li class="page-item">
+                <a class="page-link" href="<?= $this->url($route, [], ['query' => ['page' => $this->next], 'fragment' => $this->fragment], true) ?>">
+                    &raquo;
+                </a>
+            </li>
+        <?php else: ?>
+            <li class="page-item disabled">
+                <span class="page-link" aria-hidden="true">&raquo;</span>
+            </li>
+        <?php endif; ?>
+    </ul>
+</nav>
+<?php endif; ?>

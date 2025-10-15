@@ -1,0 +1,92 @@
+<?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \Laminas\Paginator\Paginator $paginator
+ * @var array|null $weatherData
+ * @var string|null $location
+ */
+
+// Local variables for clarity
+$paginator = $this->paginator;
+$weatherData = $this->weatherData;
+$currentLocation = $this->location;
+?>
+
+<h1>Weather Lookup</h1>
+
+<?php if ($this->flashMessenger()->hasErrorMessages()): ?>
+    <div class="alert alert-danger" role="alert">
+        <?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?>
+            <p><?= $this->escapeHtml($message) ?></p>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
+
+<div class="location-selection-area">
+    <h2>Available Locations (Page <?= $paginator->getCurrentPageNumber() ?>)</h2>
+    
+    <div class="list-group">
+        <?php 
+        // Iterate through the locations on the current page
+        foreach ($paginator as $city): 
+            // Build the URL to call the indexAction with the selected location and current page number
+            $linkUrl = $this->url('weather', [], ['query' => ['location' => $city, 'page' => $paginator->getCurrentPageNumber()]]);
+            $isActive = ($city === $currentLocation) ? 'active' : '';
+        ?>
+        <a href="<?= $linkUrl ?>" class="list-group-item list-group-item-action <?= $isActive ?>">
+            <?= $this->escapeHtml($city) ?>
+        </a>
+        <?php endforeach; ?>
+    </div>
+    
+    <div class="pagination-controls mt-3">
+        <?php 
+        // 2. Pagination Controls
+        // Use the built-in pagination control view helper
+        echo $this->paginationControl(
+            $paginator, 
+            'sliding', 
+            // Use the standard partial view for rendering controls
+            'partial/paginator.phtml', 
+            // Options to pass to the partial view (the route to generate links)
+            ['route' => 'weather'] 
+        ); 
+        ?>
+    </div>
+</div>
+
+<hr>
+
+<div class="weather-data-display">
+    <h2>Weather Details for: 
+        <strong><?= $currentLocation ? $this->escapeHtml($currentLocation) : '—' ?></strong>
+    </h2>
+
+    <?php if ($weatherData): ?>
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <?= $this->escapeHtml($weatherData['description']) ?>
+                    <img src="https://openweathermap.org/img/wn/<?= $this->escapeHtml($weatherData['icon']) ?>@2x.png" alt="Weather Icon" class="weather-icon">
+                </h5>
+                <p class="card-text">
+                    <strong>Temperature:</strong> <?= number_format($weatherData['temperature'], 1) ?> &deg;C
+                </p>
+                <p class="card-text">
+                    <strong>Location:</strong> <?= $this->escapeHtml($weatherData['city']) ?>
+                </p>
+            </div>
+        </div>
+    <?php elseif ($currentLocation): ?>
+        <p class="text-danger">Could not load weather data. Please check the API key and location availability.</p>
+    <?php else: ?>
+        <p class="text-info">Please select a location from the list above.</p>
+    <?php endif; ?>
+</div>
+
+<style>
+/* Basic styling for better visibility */
+.list-group-item { margin-bottom: 5px; }
+.weather-icon { vertical-align: middle; height: 30px; }
+.alert-danger { padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; border-radius: 4px; }
+</style>
